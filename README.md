@@ -12,61 +12,37 @@ The complexity of a policy varies, on the one hand, with the number of rules, an
 
 ### 2 Memory Usage
 
-To evaluate the memory consumption, we take into account the fact that the Policy Engine can be integrated into two different environments: the Core Runtime and the Vertx Messaging Node. In both environments, policies can be stored both persistently and not persistently. The persistent way of storing policies in the Core Runtime is done through the Persistence Manager, which uses the Local Storage. It is a storage type that provides a means to store data with no expiration date within the user’s browser. The Vertx Messaging Node policies are stored in a file, which is loaded when the first message is sent to the Policy Engine for validation. To understand the impact of loading policies from the persistent memory when the system is booted, we must quantify how many bytes their representation requires. Figure 1 presents the number of bytes occupied by policies with 1, 10, 100 and 1000 simple conditions and by policies with 1 rule composed of 1 advanced condition that combines 1, 10, 100 and 1000 simple conditions. In Figure 6.1 (a), it is presented the number of bytes used by the Persistence Manager to store each policy; Figure 6.1 (b) presents the measurements obtained for the policies stored in JSON/XML files. For better readability, Figure 6.1 (c) illustrates the measurements presented in Figure 6.1 (a) in a chart, and 6.1 (b) illustrates the measurements presented in Figure 6.1 (d). Taking into account the results obtained for PoliTHINK and for XACML in both platforms, we observe that our solution is always more efficient than XACML in terms of memory usage. On average, a policy represented in PoliTHINK is 7,6 times more concise than XACML to specify the same behavior. Also, we can conclude that the number of bytes used to represent policies is always higher when using the Persistence Manager, as depicted in Figure 6.1. This is justified by the encoding used in the different environments. On the one hand, the Local Storage used by the Persistence Manager stores the policy as a JavaScript string, which uses UTF-16 encoding, i.e., each character is represented by 16-bit blocks. On the other hand, the default encoding of the Vertx Messaging Node is UTF-8, i.e., each character is represented by 8-bit blocks. For the most verbose policies, namely XACML, the measurements made for the file are approximately half of what was measured for the Local Storage, which clearly reflects the impact of the encoding on each platform. Adding to these observations, it should also be noted that representing the same conditions on a simple policy and on an advanced policy implies a big difference when it comes to the number of bytes needed. While a simple policy with X conditions requires the specification of X rules with fixed fields repeated X times, advanced policies only require that these fields are represented once for the rule holding the advanced condition. For this reason, the discrepancy between the occupied memory for simple and advanced policies increases rapidly for 1, 10, 100 and 1000 conditions.
+To evaluate the memory consumption, we take into account the fact that the Policy Engine can be integrated into two different environments: the Core Runtime and the Vertx Messaging Node. In both environments, policies can be stored both persistently and not persistently. The persistent way of storing policies in the Core Runtime is done through the Persistence Manager, which uses the Local Storage. It is a storage type that provides a means to store data with no expiration date within the user’s browser. The Vertx Messaging Node policies are stored in a file, which is loaded when the first message is sent to the Policy Engine for validation. To understand the impact of loading policies from the persistent memory when the system is booted, we must quantify how many bytes their representation requires. Figure 1 (below) presents the number of bytes occupied by policies with 1, 10, 100 and 1000 simple conditions and by policies with 1 rule composed of 1 advanced condition that combines 1, 10, 100 and 1000 simple conditions. In Figure 1 (a), it is presented the number of bytes used by the Persistence Manager to store each policy; Figure 1 (b) presents the measurements obtained for the policies stored in JSON/XML files. For better readability, Figure 1 (c) illustrates the measurements presented in Figure 1 (a) in a chart, and 1 (b) illustrates the measurements presented in Figure 1 (d).
 
-![Policy Engine Architecture](./images/figure1.png)
+Taking into account the results obtained for PoliTHINK and for XACML in both platforms, we observe that our solution is always more efficient than XACML in terms of memory usage. On average, a policy represented in PoliTHINK is 7,6 times more concise than XACML to specify the same behavior. Also, we can conclude that the number of bytes used to represent policies is always higher when using the Persistence Manager, as depicted in Figure 1. This is justified by the encoding used in the different environments. On the one hand, the Local Storage used by the Persistence Manager stores the policy as a JavaScript string, which uses UTF-16 encoding, i.e., each character is represented by 16-bit blocks. On the other hand, the default encoding of the Vertx Messaging Node is UTF-8, i.e., each character is represented by 8-bit blocks. For the most verbose policies, namely XACML, the measurements made for the file are approximately half of what was measured for the Local Storage, which clearly reflects the impact of the encoding on each platform. Adding to these observations, it should also be noted that representing the same conditions on a simple policy and on an advanced policy implies a big difference when it comes to the number of bytes needed. While a simple policy with X conditions requires the specification of X rules with fixed fields repeated X times, advanced policies only require that these fields are represented once for the rule holding the advanced condition. For this reason, the discrepancy between the occupied memory for simple and advanced policies increases rapidly for 1, 10, 100 and 1000 conditions.
+
+![Persistent Memory Usage for Policy Representation](./images/figure1.png)
 
 **Figure 1: Persistent memory usage for policy representation**
 
 ### 3 Policy Loading Time
 
-One of the requirements of PoliTHINK is that it provides an efficient solution in terms of the necessary
-time for loading and evaluating policies. Similarly to the previous section, this section presents the
-measurements obtained for the loading time of simple and advanced policies with an increasing number
-of rules and conditions. Next, we will present the time measurements obtained when loading policies
+One of the requirements of PoliTHINK is that it provides an efficient solution in terms of the necessary time for loading and evaluating policies. Similarly to the previous section, this section presents the measurements obtained for the loading time of simple and advanced policies with an increasing number of rules and conditions. Next, we will present the time measurements obtained when loading policies
 from persistent memory and from the local hash table, starting with the former.
-6.3.1 Loading Time from Persistent Memory
-The policies loading time from persistent memory is measured differently in both environments
-where the Policy Engine is integrated. For the Core Runtime, policies are stored using the Persistence
-Manager; for the Vertx Messaging Node, policies are stored in a text file. To measure the loading
-time in the Core Runtime, a timer is set using a library that generates the microseconds before the
-policy is loaded from the Persistence Manager, and a second timer is set right after that request is
-fulfilled. Loading a policy with a given key from the Persistence Manager consists of requesting the
-Local Storage to retrieve the value that corresponds to the policy key, which is then parsed to JSON
-format. Subtracting the two timers gives the time it takes for the policy to be loaded from the Persistence
-Manager. To measure the loading time in the Vertx Messaging Node, a timer is set before reading
-the file, which consists on instantiating a FileInputStream and a BufferedReader given the path to the
-JSON/XML file holding the policy, and then reading the file line by line, concatenating the contents in
-a string. The measurements obtained for the policies loading time are presented in Figure 6.2, where
-72
-(a) Policies loading time in the Core Runtime (in microseconds)
-(b) Policies loading time in the Vertx Messaging Node (in
-microseconds)
-(c) Chart of the policies loading time in the Core Runtime (d) Chart of the policies loading time in the Vertx Messaging
-Node
-Figure 6.2: Policies loading time from persistent memory
-Figure 6.2 (a) shows the loading time of policies when using the Persistence Manager, and Figure 6.2 (b)
-presents the measurements obtained for the same policies but when they are loaded from JSON/XML
-files. Figure 6.2 (c) illustrates the measurements presented in Figure 6.2 (a), and 6.2 (b) illustrates the
-measurements presented in Figure 6.2 (d).
-Taking into account the results obtained for PoliTHINK and for XACML in both platforms, we observe
-that our solution is always more efficient than XACML in terms of loading time from persistent memory.
-The policy loading time is closely linked with the corresponding memory usage, i.e., as the policies’
-complexity implies a higher number of bytes to represent them, the more time it is needed to load them.
-This relationship is illustrated in Figure 6.3, where Figure 6.3 (a) illustrates the memory usage for policies
-in the Core Runtime and 6.3 (b) illustrates the policy loading time in the same environment. In this figure
-it is possible to clearly observe the trend of the policies loading time from persistent memory, which
-follows the trend of memory usage in the Persistence Manager.
-When the policies are loaded from the persistent memory to the Policy Engine, they are stored in
-a local hash table. This hash table is then accessed for each message if there is an active user policy
-(in the Core Runtime), or if there is an applicable service. Next, we present the measurements obtained
-when loading the policies from the local hash table.
-73
-(a) Chart of the occupied memory using the Persistence
-Manager
-(b) Chart of the policies loading time in the Core Runtime
-Figure 6.3: Memory usage and policies loading time comparison
-6.3.2 Loading Time from Local Hash Table
+
+#### 3.1 Loading Time from Persistent Memory
+
+The policies loading time from persistent memory is measured differently in both environments where the Policy Engine is integrated. For the Core Runtime, policies are stored using the Persistence Manager; for the Vertx Messaging Node, policies are stored in a text file. To measure the loading time in the Core Runtime, a timer is set using a library that generates the microseconds before the policy is loaded from the Persistence Manager, and a second timer is set right after that request is fulfilled. Loading a policy with a given key from the Persistence Manager consists of requesting the Local Storage to retrieve the value that corresponds to the policy key, which is then parsed to JSON format. Subtracting the two timers gives the time it takes for the policy to be loaded from the Persistence Manager. To measure the loading time in the Vertx Messaging Node, a timer is set before reading the file, which consists on instantiating a FileInputStream and a BufferedReader given the path to the JSON/XML file holding the policy, and then reading the file line by line, concatenating the contents in a string. The measurements obtained for the policies loading time are presented in Figure 2 (below), where Figure 2 (a) shows the loading time of policies when using the Persistence Manager, and Figure 2 (b) presents the measurements obtained for the same policies but when they are loaded from JSON/XML files. Figure 2 (c) illustrates the measurements presented in Figure 2 (a), and 2 (b) illustrates the measurements presented in Figure 2 (d).
+
+![Policies Loading Time from Persistent Memory](./images/figure2.png)
+
+**Figure 2: Policies loading time from persistent memory**
+
+Taking into account the results obtained for PoliTHINK and for XACML in both platforms, we observe that our solution is always more efficient than XACML in terms of loading time from persistent memory. The policy loading time is closely linked with the corresponding memory usage, i.e., as the policies' complexity implies a higher number of bytes to represent them, the more time it is needed to load them. This relationship is illustrated in Figure 3 (below), where Figure 3 (a) illustrates the memory usage for policies in the Core Runtime and 3 (b) illustrates the policy loading time in the same environment. In this figure it is possible to clearly observe the trend of the policies loading time from persistent memory, which follows the trend of memory usage in the Persistence Manager.
+
+When the policies are loaded from the persistent memory to the Policy Engine, they are stored in a local hash table. This hash table is then accessed for each message if there is an active user policy (in the Core Runtime), or if there is an applicable service. Next, we present the measurements obtained when loading the policies from the local hash table.
+
+![Memory Usage and Policies Loading Time Comparison](./images/figure3.png)
+
+**Figure 3: Memory usage and policies loading time comparison**
+
+#### 3.2 Loading Time from Local Hash Table
+
 A hash table is a data structure that can map keys to values through a hash function in constant time.
 To avoid the overhead introduced by loading the policies from the persistent memory for each message
 that requires policy evaluation, the Policy Engine uses a hash table to store the policies that correspond
