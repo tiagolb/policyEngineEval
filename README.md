@@ -1,6 +1,6 @@
 # Policy Engine Evaluation (INESC-ID)
 
-This chapter presents the evaluation of the PoliTHINK system. This chapter starts by describing the methodology (link here). Afterwords, this chapter described the memory usage measurements (link here) and the measures for the loading times of policies from both non-persistent memory and persistent memory (link here). Finally, this chapter also describes measures the evaluation time of policies (link here).
+This chapter presents the evaluation of the PoliTHINK system. This chapter starts by describing the methodology (section 1). Afterwords, this chapter described the memory usage measurements (section 2) and the measures for the loading times of policies from both non-persistent memory and persistent memory (section 3). Finally, this chapter also describes measures the evaluation time of policies (section 4).
 
 ### 1 Methodology
 
