@@ -1,6 +1,6 @@
 # Policy Engine Evaluation (INESC-ID)
 
-This chapter presents the evaluation of the PoliTHINK system. This chapter starts by describing the methodology ([section 1](#1-methodology)). Afterwords, this chapter described the memory usage measurements (section 2) and the measures for the loading times of policies from both non-persistent memory and persistent memory (section 3). Finally, this chapter also describes measures the evaluation time of policies (section 4).
+This chapter presents the evaluation of the PoliTHINK system. This chapter starts by describing the methodology ([section 1](#1-methodology)). Afterwords, this chapter described the memory usage measurements ([section 2](#2-memory-usage)) and the measures for the loading times of policies from both non-persistent memory and persistent memory ([section 3](#3-policy-loading-time)). Finally, this chapter also describes measures the evaluation time of policies ([section 4](#4-policy-evaluation-time)).
 
 ### 1 Methodology
 
@@ -51,7 +51,10 @@ requires the specification of X rules with fixed fields repeated X times, advanc
 that these fields are represented once for the rule holding the advanced condition. For this reason, the
 discrepancy between the occupied memory for simple and advanced policies increases rapidly for 1, 10,
 100 and 1000 conditions.
-6.3 Policy Loading Time
+
+
+### 3 Policy Loading Time
+
 One of the requirements of PoliTHINK is that it provides an efficient solution in terms of the necessary
 time for loading and evaluating policies. Similarly to the previous section, this section presents the
 measurements obtained for the loading time of simple and advanced policies with an increasing number
@@ -129,7 +132,10 @@ microseconds)
 (c) Chart of the policies loading time in the Core Runtime (d) Chart of the policies loading time in the Vertx Messaging
 Node
 Figure 6.4: Policies loading time from non-persistent memory
-6.4 Policy Evaluation Time
+
+
+### 4 Policy Evaluation Time
+
 A policy is composed of a set of rules, which by their turn are composed of 1 or more conditions,
 simple or advanced. The evaluation of a policy consists of evaluating each rule on the array of rules;
 the evaluation of a rule consists of verifying the condition applicability and returning the specified authorization
@@ -163,7 +169,10 @@ to embed JavaScript code in Java applications, this outcome would be expected:
 to execute the JavaScript code of the Policy Engine, Nashorn compiles it into Java bytecodes and runs
 them on the JVM (Java Virtual Machine) itself. Consequently, the overhead introduced by this process
 was reflected in the policy evaluation time.
-6.5 Summary
+
+
+### 5 Summary
+
 In this chapter we presented the evaluation of the implemented solution. For the two types of
 policies, i.e., that are composed of simple or advanced conditions, we studied the behavior of the solution
 by observing the time it takes to load and evaluate policies while increasing the policies’ complexity. Our
